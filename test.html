@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Video</title>
+    <script src="https://player.vimeo.com/api/player.js"></script>
+</head>
+<body>
+    <h1>강의 영상 시청</h1>
+    <!-- Vimeo 영상 임베드 코드 -->
+    <div style="padding:56.25% 0 0 0;position:relative;">
+        <iframe src="https://player.vimeo.com/video/1029746022?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" 
+                frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" 
+                style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                title="2024-11-14 02-09-06">
+        </iframe>
+    </div>
+
+    <script>
+        // Vimeo Player 초기화
+        var iframe = document.querySelector('iframe');
+        var player = new Vimeo.Player(iframe);
+
+        let totalWatchTime = 0;   // 누적 시청 시간 (초 단위)
+        let sessionStart = null;  // 각 시청 세션의 시작 시간
+        let maxAllowedWatchTime = 0;  // 허용된 최대 시청 시간
+
+        // 총 재생 시간을 두 배로 설정
+        player.getDuration().then(function(duration) {
+            maxAllowedWatchTime = duration * 2; // 영상 길이의 두 배 설정
+        });
+
+        // 재생 시작할 때 시청 시간 추적 시작
+        player.on('play', function() {
+            sessionStart = Date.now();
+        });
+
+        // 일시 정지될 때 시청 시간 누적
+        player.on('pause', function() {
+            if (sessionStart) {
+                totalWatchTime += (Date.now() - sessionStart) / 1000; // 밀리초를 초 단위로 변환
+                sessionStart = null;
+            }
+            checkWatchTime(); // 시청 시간 초과 확인
+        });
+
+        // 영상이 끝날 때도 시청 시간 누적
+        player.on('ended', function() {
+            if (sessionStart) {
+                totalWatchTime += (Date.now() - sessionStart) / 1000;
+                sessionStart = null;
+            }
+            checkWatchTime(); // 시청 시간 초과 확인
+        });
+
+        // 허용된 시청 시간 초과 시 재생 중지
+        function checkWatchTime() {
+            if (totalWatchTime >= maxAllowedWatchTime) {
+                player.pause(); // 재생 중지
+                alert("허용된 시청 시간을 초과하여 재생이 중지되었습니다.");
+            }
+        }
+    </script>
+</body>
+</html>
